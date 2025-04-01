@@ -5,6 +5,99 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hubli-Dharwad Armwrestling Meetups</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+:root {
+    --primary: #f59e0b;
+    --dark: #1a1a1a;
+    --dark-alt: #2d2d2d;
+    --light: #ffffff;
+}
+
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background-color: var(--dark);
+    color: var(--light);
+    line-height: 1.6;
+    margin: 0;
+    padding: 20px;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.title {
+    text-align: center;
+    color: var(--primary);
+    margin-bottom: 2rem;
+    font-size: 2.5rem;
+}
+
+.card {
+    background: var(--dark-alt);
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+input {
+    width: 100%;
+    padding: 0.8rem;
+    border: 1px solid #374151;
+    border-radius: 5px;
+    background: #111827;
+    color: var(--light);
+    margin-bottom: 0.5rem;
+}
+
+.btn {
+    width: 100%;
+    padding: 1rem;
+    background: var(--primary);
+    color: var(--light);
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: opacity 0.3s;
+}
+
+.btn:hover {
+    opacity: 0.9;
+}
+
+#eventsList {
+    display: grid;
+    gap: 1rem;
+}
+
+.event-card {
+    background: var(--dark-alt);
+    padding: 1rem;
+    border-radius: 8px;
+    border-left: 4px solid var(--primary);
+}
+
+.event-card h3 {
+    margin-top: 0;
+    color: var(--primary);
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 0 15px;
+    }
+    
+    .title {
+        font-size: 2rem;
+    }
+}</style>
 </head>
 
 <body>
@@ -45,6 +138,78 @@
         </div>
     </div>
 
-    <script src="app.js"></script>
+    <script>// Initialize from localStorage
+let events = JSON.parse(localStorage.getItem('meetups')) || [];
+let subscribers = JSON.parse(localStorage.getItem('subscribers')) || [];
+
+function handleSignup() {
+    const name = document.getElementById('name').value;
+    const email = document.getElementById('email').value;
+
+    if (!name || !email) {
+        alert('Please fill in all fields');
+        return;
+    }
+
+    if (!validateEmail(email)) {
+        alert('Please enter a valid email address');
+        return;
+    }
+
+    subscribers.push({ name, email });
+    localStorage.setItem('subscribers', JSON.stringify(subscribers));
+    
+    alert(`Welcome ${name}! You'll receive meetup notifications.`);
+    document.getElementById('name').value = '';
+    document.getElementById('email').value = '';
+}
+
+function handleEventPost() {
+    const title = document.getElementById('eventTitle').value;
+    const date = document.getElementById('eventDate').value;
+    const location = document.getElementById('eventLocation').value;
+
+    if (!title || !date || !location) {
+        alert('Please fill in all event fields');
+        return;
+    }
+
+    const newEvent = {
+        id: Date.now(),
+        title,
+        date,
+        location,
+        posted: new Date().toISOString()
+    };
+
+    events = [newEvent, ...events];
+    localStorage.setItem('meetups', JSON.stringify(events));
+    renderEvents();
+    
+    alert(`Event posted! ${subscribers.length} participants will be notified.`);
+    document.getElementById('eventTitle').value = '';
+    document.getElementById('eventDate').value = '';
+    document.getElementById('eventLocation').value = '';
+}
+
+function validateEmail(email) {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+}
+
+function renderEvents() {
+    const container = document.getElementById('eventsList');
+    container.innerHTML = events.map(event => `
+        <div class="event-card">
+            <h3>${event.title}</h3>
+            <p>📅 ${new Date(event.date).toLocaleDateString()}</p>
+            <p>📍 ${event.location}</p>
+        </div>
+    `).join('');
+}
+
+// Initial render
+renderEvents();
+    </script>
 </body>
 </html>
